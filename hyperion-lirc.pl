@@ -6,6 +6,18 @@ use IO::Select;
 use Time::HiRes (gettimeofday);
 
 
+# The name of the remote control from lircd.conf
+$lirc_remote_name = "aldi-pool-leds";
+
+# which host is lirc running ? (make sure it has --listen)
+$lirc_host = "loungepi.home";
+
+# Which host and port is hyperion running on?
+$hyperion_host = "loungepi.home";
+$hyperion_port = "19444";
+
+
+
 $SIG{PIPE} = sub {
 	print "got a sigpipe: $!\n";
 	if ( (defined $lirc_socket) && ($lirc_socket->connected()) ) {
@@ -21,13 +33,6 @@ kill_previous();
 
 $hostname = `hostname`;
 chomp $hostname;
-
-$lirc_remote_name = "aldi-pool-leds";
-
-$lirc_host = "loungepi.home";
-
-$hyperion_host = "loungepi.home";
-$hyperion_port = "19444";
 
 $led_last_val=0.2;
 $led_last_colour="[130,255,255]";
