@@ -8,11 +8,11 @@ use Time::HiRes (gettimeofday);
 
 $SIG{PIPE} = sub {
 	print "got a sigpipe: $!\n";
-	if ( (defined $lounge_socket) && ($lounge_socket->connected()) ) {
-		print "lounge is connected\n";
+	if ( (defined $lirc_socket) && ($lirc_socket->connected()) ) {
+		print "lirc is connected\n";
 	} else {
-		print "lounge is not connected\n";
-		$s->remove($lounge_socket);
+		print "lirc is not connected\n";
+		$s->remove($lirc_socket);
 	}
 	$blah = $s->handles(); print "blah is $blah\n";
 };
@@ -24,7 +24,7 @@ chomp $hostname;
 
 $lirc_remote_name = "aldi-pool-leds";
 
-$loungehost = "loungepi.home";
+$lirc_host = "loungepi.home";
 
 $hyperion_host = "loungepi.home";
 $hyperion_port = "19444";
@@ -54,7 +54,7 @@ sub check_sockets() {
 		print "close lounge_socket\n";
 		close ($lounge_socket);
 		our $lounge_socket = new IO::Socket::INET (
-			PeerAddr => $loungehost,
+			PeerAddr => $lirc_host,
 			PeerPort => '8765',
 			Proto => 'tcp',
 		);
@@ -103,15 +103,15 @@ while (1) {
 
 sub open_sockets() {
 	our $lounge_socket = new IO::Socket::INET (
-		PeerAddr => $loungehost,
+		PeerAddr => $lirc_host,
 		PeerPort => '8765',
 		Proto => 'tcp',
 	);
-	if ($lounge_socket) {
-		print (STDERR "opened lounge_socket\n");
-		$s->add($lounge_socket);
+	if ($lirc_socket) {
+		print (STDERR "opened lirc_socket\n");
+		$s->add($lirc_socket);
 	} else {
-		print "Could not create lounge_socket: $!\n";
+		print "Could not create lirc_socket: $!\n";
 	}
 
 
@@ -135,8 +135,8 @@ sub handle_press {
 }
 
 sub close_sockets {
-    print "close lounge_socket\n";
-    close ($lounge_socket);
+    print "close lirc_socket\n";
+    close ($lirc_socket);
     printf ("sleeping ");
 #    for ($i=0; $i<5; $i++) {
         sleep(1);
@@ -151,14 +151,14 @@ sub send_code {
 	my ($s, $usec) = gettimeofday(); printf ("%1d\.%06d: ", $s%10, $usec);
 	$cmd = sprintf ("SEND_ONCE\t%s %s %s\n", $control, $button, $repeat);
 
-	if (defined $lounge_socket) {
-		print $lounge_socket->peerhost().":".$lounge_socket->peerport();
+	if (defined $lirc_socket) {
+		print $lirc_socket->peerhost().":".$lirc_socket->peerport();
 		print "\t$cmd";
 
-		if ( print ($lounge_socket $cmd) ) {
+		if ( print ($lirc_socket $cmd) ) {
 		} else {
 		    print "Error writing to socket: $!\n";
-		    undef $lounge_socket;
+		    undef $lirc_socket;
 		}
 	} else {
 		print "Error writing to socket.\n";
